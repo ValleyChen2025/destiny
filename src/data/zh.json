@@ -1,0 +1,90 @@
+{
+  "site": {
+    "title": "八字精批",
+    "subtitle": "洞悉命运 · 把握未来",
+    "price": "$360",
+    "priceNote": "起"
+  },
+  "nav": {
+    "home": "首页",
+    "services": "服务",
+    "articles": "文章",
+    "videos": "视频",
+    "about": "关于",
+    "quote": "询价"
+  },
+  "footer": {
+    "about": "关于",
+    "privacy": "隐私声明",
+    "contact": "联系我们",
+    "copyright": "© 2024 八字精批. All rights reserved."
+  },
+  "home": {
+    "heroTitle": "八字精批",
+    "heroSubtitle": "洞悉命运 · 把握未来",
+    "heroTitleEn": "Destiny Analysis",
+    "heroSubtitleEn": "Know Your Fate · Seize Your Future",
+    "ctaPrimary": "立即询价",
+    "ctaSecondary": "了解更多",
+    "articlesTitle": "文章",
+    "videosTitle": "视频"
+  },
+  "services": {
+    "title": "服务项目",
+    "basicTitle": "八字基础分析",
+    "basicPrice": "$360",
+    "basicDesc": "事业财运 · 婚姻感情 · 健康运势 · 学业规划",
+    "advanceTitle": "八字深度分析",
+    "advancePrice": "$680",
+    "advanceDesc": "包含基础分析 + 十年大运 + 流年详解 + 趋吉避凶建议"
+  },
+  "about": {
+    "title": "关于我",
+    "content": "专注八字命理分析多年，帮助数千人了解自己的人生轨迹。",
+    "privacyTitle": "隐私声明",
+    "privacyContent": "所有提交的八字信息仅用于分析，我们将严格保密，绝不泄露给任何第三方。"
+  },
+  "quote": {
+    "title": "立即询价",
+    "name": "姓名",
+    "namePlaceholder": "请输入您的姓名",
+    "contact": "联系方式",
+    "contactPlaceholder": "邮箱或微信",
+    "birthDate": "出生日期",
+    "birthTime": "出生时间",
+    "birthTimePlaceholder": "如：上午9点/下午3点",
+    "birthPlace": "出生地点",
+    "birthPlacePlaceholder": "如：上海",
+    "message": "补充说明",
+    "messagePlaceholder": "您想了解哪些方面？",
+    "submit": "提交询价",
+    "success": "提交成功！",
+    "successDesc": "我们将在24小时内与您联系。"
+  },
+  "payment": {
+    "title": "支付方式",
+    "desc": "请选择以下支付方式完成付款",
+    "wechat": "微信支付",
+    "alipay": "支付宝",
+    "paypal": "PayPal",
+    "wise": "Wise",
+    "note": "付款后请截图保存，我们将与您确认"
+  },
+  "articles": {
+    "title": "文章"
+  },
+  "videos": {
+    "title": "视频"
+  },
+  "orders": {
+    "title": "订单管理",
+    "status": "状态",
+    "pending": "待确认",
+    "confirmed": "已确认",
+    "paid": "已支付",
+    "completed": "已完成",
+    "confirm": "确认",
+    "markPaid": "标记已支付",
+    "markCompleted": "完成"
+  }
+}

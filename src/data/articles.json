@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "title": "八字入门：什么是五行？",
+    "titleEn": "Bazi Basics: What are the Five Elements?",
+    "summary": "了解八字的基础——五行相生相克",
+    "summaryEn": "Understanding the Five Elements in Bazi",
+    "date": "2024-01-15"
+  },
+  {
+    "id": 2,
+    "title": "如何判断八字的强弱？",
+    "titleEn": "How to Judge Bazi Strength?",
+    "summary": "八字格局高低的核心判断方法",
+    "summaryEn": "Core methods for analyzing Bazi structure",
+    "date": "2024-02-20"
+  },
+  {
+    "id": 3,
+    "title": "事业财运应该怎么看？",
+    "titleEn": "How to Analyze Career & Wealth?",
+    "summary": "从八字看事业发展和财运走势",
+    "summaryEn": "Analyzing career development and wealth from Bazi",
+    "date": "2024-03-10"
+  }
+]

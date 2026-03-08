@@ -1,0 +1,90 @@
+{
+  "site": {
+    "title": "Destiny Analysis",
+    "subtitle": "Know Your Fate · Seize Your Future",
+    "price": "$360",
+    "priceNote": "starting"
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "articles": "Articles",
+    "videos": "Videos",
+    "about": "About",
+    "quote": "Quote"
+  },
+  "footer": {
+    "about": "About",
+    "privacy": "Privacy",
+    "contact": "Contact",
+    "copyright": "© 2024 Destiny Analysis. All rights reserved."
+  },
+  "home": {
+    "heroTitle": "Destiny Analysis",
+    "heroSubtitle": "Know Your Fate · Seize Your Future",
+    "heroTitleEn": "Destiny Analysis",
+    "heroSubtitleEn": "Know Your Fate · Seize Your Future",
+    "ctaPrimary": "Get Quote",
+    "ctaSecondary": "Learn More",
+    "articlesTitle": "Articles",
+    "videosTitle": "Videos"
+  },
+  "services": {
+    "title": "Services",
+    "basicTitle": "Basic Bazi Analysis",
+    "basicPrice": "$360",
+    "basicDesc": "Career & Wealth · Love & Marriage · Health · Education",
+    "advanceTitle": "Advanced Bazi Analysis",
+    "advancePrice": "$680",
+    "advanceDesc": "Includes Basic + 10-Year Fortune · Yearly Analysis · Advice"
+  },
+  "about": {
+    "title": "About Me",
+    "content": "Years of experience in Bazi destiny analysis, helping thousands understand their life path.",
+    "privacyTitle": "Privacy Policy",
+    "privacyContent": "All Bazi information submitted is only used for analysis. We will keep it strictly confidential and never share with any third party."
+  },
+  "quote": {
+    "title": "Get Quote",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "contact": "Contact",
+    "contactPlaceholder": "Email or WeChat",
+    "birthDate": "Birth Date",
+    "birthTime": "Birth Time",
+    "birthTimePlaceholder": "e.g., 9 AM / 3 PM",
+    "birthPlace": "Birth Place",
+    "birthPlacePlaceholder": "e.g., Shanghai",
+    "message": "Message",
+    "messagePlaceholder": "What would you like to know?",
+    "submit": "Submit",
+    "success": "Submitted Successfully!",
+    "successDesc": "We will contact you within 24 hours."
+  },
+  "payment": {
+    "title": "Payment Methods",
+    "desc": "Please choose a payment method to complete",
+    "wechat": "WeChat Pay",
+    "alipay": "Alipay",
+    "paypal": "PayPal",
+    "wise": "Wise",
+    "note": "Please save your payment screenshot for confirmation"
+  },
+  "articles": {
+    "title": "Articles"
+  },
+  "videos": {
+    "title": "Videos"
+  },
+  "orders": {
+    "title": "Orders",
+    "status": "Status",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "paid": "Paid",
+    "completed": "Completed",
+    "confirm": "Confirm",
+    "markPaid": "Mark Paid",
+    "markCompleted": "Complete"
+  }
+}

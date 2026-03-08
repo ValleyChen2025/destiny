@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "title": "八字基础教程第一课",
+    "titleEn": "Bazi Basics Tutorial Part 1",
+    "thumbnail": "/images/video1.jpg",
+    "date": "2024-01-01"
+  },
+  {
+    "id": 2,
+    "title": "八字入门第二课",
+    "titleEn": "Bazi Basics Tutorial Part 2",
+    "thumbnail": "/images/video2.jpg",
+    "date": "2024-02-01"
+  },
+  {
+    "id": 3,
+    "title": "八字案例分析",
+    "titleEn": "Bazi Case Analysis",
+    "thumbnail": "/images/video3.jpg",
+    "date": "2024-03-01"
+  }
+]
