@@ -28,10 +28,6 @@ export default function ServiceHero() {
 
         <div className="w-32 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-8" />
 
-        <div className="text-3xl md:text-4xl font-bold mb-8">
-          {t.site.price} <span className="text-lg font-normal text-gray-500">{t.site.priceNote}</span>
-        </div>
-
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/quote"

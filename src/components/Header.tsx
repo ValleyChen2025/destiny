@@ -11,12 +11,14 @@ export default function Header() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const isZh = lang === 'zh';
+
   const navItems = [
-    { href: '/', label: t.nav.home },
-    { href: '/articles', label: t.nav.articles },
-    { href: '/videos', label: t.nav.videos },
-    { href: '/about', label: t.nav.about },
-    { href: '/quote', label: t.nav.quote },
+    { href: '/', label: isZh ? '首页' : 'Home' },
+    { href: '/articles', label: isZh ? '文章' : 'Articles', badge: isZh ? '即将上线' : 'Soon' },
+    { href: '/videos', label: isZh ? '视频' : 'Videos', badge: isZh ? '即将上线' : 'Soon' },
+    { href: '/about', label: isZh ? '关于' : 'About' },
+    { href: '/quote', label: isZh ? '询价' : 'Quote' },
   ];
 
   return (
@@ -37,6 +39,9 @@ export default function Header() {
                 }`}
               >
                 {item.label}
+                {item.badge && (
+                  <span className="ml-1 text-xs text-gray-400">({item.badge})</span>
+                )}
               </Link>
             ))}
             <button
@@ -67,6 +72,9 @@ export default function Header() {
                 }`}
               >
                 {item.label}
+                {item.badge && (
+                  <span className="ml-1 text-xs text-gray-400">({item.badge})</span>
+                )}
               </Link>
             ))}
             <button
