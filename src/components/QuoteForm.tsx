@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useLanguage } from './LanguageContext';
-// import { calculateBazi, formatBaziString } from '@/utils/baziEngine';
+import { calculateBazi, formatBaziString } from '@/utils/baziEngine';
 
 // Google Apps Script API URL
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzZ9YHlJE_It6JfRLDQVXkXURtdNqN4t0XQx0JA7reLPclRCEKw7nwbVkODoPBxSoEP/exec';
@@ -27,17 +27,17 @@ export default function QuoteForm() {
     const birthDate = formData.get('birthdate') as string;
     const birthTime = formData.get('birthtime') as string;
 
-    // 八字计算 - 暂时禁用以测试表单
-    // if (birthDate && birthTime) {
-    //   try {
-    //     const baziResult = calculateBazi(birthDate, birthTime, longitude, isSouthern);
-    //     const baziString = formatBaziString(baziResult);
-    //     formData.append('bazi', baziString);
-    //     formData.append('bazi_detail', JSON.stringify(baziResult));
-    //   } catch (err) {
-    //     console.error('八字计算错误:', err);
-    //   }
-    // }
+    // 计算八字（后台进行，不显示给用户）
+    if (birthDate && birthTime) {
+      try {
+        const baziResult = calculateBazi(birthDate, birthTime, longitude, isSouthern);
+        const baziString = formatBaziString(baziResult);
+        formData.append('bazi', baziString);
+        formData.append('bazi_detail', JSON.stringify(baziResult));
+      } catch (err) {
+        console.error('八字计算错误:', err);
+      }
+    }
 
     // 添加经度和南半球信息
     formData.append('longitude', longitude.toString());
