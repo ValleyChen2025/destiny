@@ -134,5 +134,7 @@ function doPost(e) {
 
   sheet.appendRow(newRow);
 
-  return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
+  // 返回 JSON 格式
+  return ContentService.createTextOutput(JSON.stringify({ result: 'success' }))
+    .setMimeType(ContentService.MimeType.JSON);
 }

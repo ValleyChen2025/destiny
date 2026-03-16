@@ -38,15 +38,24 @@ export default function QuoteForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+
+      // 检查响应状态
+      if (!res.ok) {
+        setError(`服务器错误: ${res.status}`);
+        return;
+      }
+
       const result = await res.json();
+      console.log('服务器响应:', result);
+
       if (result.success) {
         setSubmitted(true);
       } else {
         setError(result.error || '提交失败');
       }
     } catch (err) {
-      console.error(err);
-      setError('网络错误');
+      console.error('提交错误:', err);
+      setError('网络错误，请稍后重试');
     } finally {
       setLoading(false);
     }

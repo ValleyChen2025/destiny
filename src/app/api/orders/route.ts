@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
 
   // 先发送到 Google Sheets
+  let googleSuccess = false;
   try {
     const formData = new URLSearchParams();
     formData.append('name', body.name || '');
@@ -57,13 +58,27 @@ export async function POST(request: NextRequest) {
     formData.append('longitude', (body.longitude || 120).toString());
     formData.append('is_southern', (body.isSouthern || false).toString());
 
-    await fetch(GOOGLE_SCRIPT_URL, {
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
       body: formData,
+      redirect: 'manual',
     });
+
+    // Google Apps Script 返回 302 重定向是正常的
+    if (response.status === 302 || response.status === 0) {
+      googleSuccess = true;
+    } else {
+      const text = await response.text();
+      console.log('Google 响应:', text);
+      if (text.includes('Success') || text.includes('success')) {
+        googleSuccess = true;
+      }
+    }
   } catch (e) {
     console.error('Google Sheets 提交失败:', e);
   }
+
+  console.log('Google Sheets 提交结果:', googleSuccess ? '成功' : '失败');
 
   // 同时保存到本地 JSON 文件
   const orders = readOrders();
