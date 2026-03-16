@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { Lunar, Solar } from 'lunar-javascript';
 
 const ordersFile = path.join(process.cwd(), 'src/data/orders.json');
 
@@ -26,6 +25,10 @@ interface Order {
   createdAt: string;
 }
 
+// 天干地支
+const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
 // 南半球月令对冲映射
 const southernZhiMap: Record<string, string> = {
   '子': '午', '丑': '未', '寅': '申', '卯': '酉',
@@ -33,7 +36,7 @@ const southernZhiMap: Record<string, string> = {
   '申': '寅', '酉': '卯', '戌': '辰', '亥': '巳'
 };
 
-// 五行对应关系
+// 五行对应
 const wuxingMap: Record<string, string> = {
   '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
   '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水',
@@ -42,33 +45,95 @@ const wuxingMap: Record<string, string> = {
   '戌': '土', '亥': '水'
 };
 
+// 计算年柱
+function getYearGanZhi(year: number): string {
+  const diff = year - 1984;
+  return GAN[(diff + 10) % 10] + ZHI[(diff + 12) % 12];
+}
+
+// 计算日柱（基于2000年1月1日=庚辰）
+function getDayGanZhi(date: Date): string {
+  // 创建UTC日期来避免时区问题
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
+
+  // 使用 UTC 时间创建基准日期
+  const base = new Date(Date.UTC(2000, 0, 1));
+  const target = new Date(Date.UTC(year, month - 1, day));
+
+  const diff = Math.floor((target.getTime() - base.getTime()) / (1000 * 60 * 60 * 24));
+  const ganIdx = (diff + 6) % 10;  // 庚=6, index=6
+  const zhiIdx = (diff + 4) % 12;  // 辰=4, index=4
+
+  console.log('日柱计算:', { year, month, day, diff, ganIdx, zhiIdx });
+
+  if (ganIdx < 0 || ganIdx >= GAN.length || zhiIdx < 0 || zhiIdx >= ZHI.length) {
+    return '甲子'; // 默认值
+  }
+
+  return GAN[ganIdx] + ZHI[zhiIdx];
+}
+
+// 计算时柱
+function getTimeZhi(hour: number): string {
+  if (hour >= 23 || hour < 1) return '子';
+  if (hour >= 1 && hour < 3) return '丑';
+  if (hour >= 3 && hour < 5) return '寅';
+  if (hour >= 5 && hour < 7) return '卯';
+  if (hour >= 7 && hour < 9) return '辰';
+  if (hour >= 9 && hour < 11) return '巳';
+  if (hour >= 11 && hour < 13) return '午';
+  if (hour >= 13 && hour < 15) return '未';
+  if (hour >= 15 && hour < 17) return '申';
+  if (hour >= 17 && hour < 19) return '酉';
+  if (hour >= 19 && hour < 21) return '戌';
+  if (hour >= 21 && hour < 23) return '亥';
+  return '子';
+}
+
+// 计算时干
+function getTimeGan(dayGan: string, timeZhi: string): string {
+  const dayGanIdx = GAN.indexOf(dayGan);
+  const zhiIdx = ZHI.indexOf(timeZhi);
+  const offset = [0, 0, 2, 2, 4, 4, 6, 6, 8, 8][dayGanIdx] || 0;
+  return GAN[(offset + zhiIdx) % 10];
+}
+
+// 获取月支（简化版，忽略精确节气）
+function getMonthZhi(month: number): string {
+  const map = ['', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑'];
+  return map[month] || '寅';
+}
+
+// 计算月干
+function getMonthGan(yearGan: string, month: number): string {
+  const yearGanIdx = GAN.indexOf(yearGan);
+  if (yearGanIdx < 0) return '甲';
+  return GAN[(yearGanIdx * 2 + month - 1) % 10];
+}
+
 // 真太阳时修正（含日期跨天处理）
 function adjustTrueSolarTime(birthDateStr: string, birthTimeStr: string, longitude: number): { date: Date; hour: number; minute: number } {
-  // 解析日期字符串
+  // 处理中文冒号
+  const normalizedTime = birthTimeStr.replace('：', ':');
   const dateParts = birthDateStr.split('-').map(Number);
   if (dateParts.some(isNaN)) {
     throw new Error(`Invalid date: ${birthDateStr}`);
   }
   const [year, month, day] = dateParts;
 
-  // 解析时间字符串
-  const timeParts = birthTimeStr.split(':').map(Number);
-  if (timeParts.some(isNaN)) {
+  const timeParts = normalizedTime.split(':').map(Number);
+  if (timeParts.length < 2 || timeParts.some(isNaN)) {
     throw new Error(`Invalid time: ${birthTimeStr}`);
   }
   const [hour, minute] = timeParts;
 
-  // 原始分钟数
   const originalMinutes = hour * 60 + minute;
-
-  // 真太阳时修正：(经度 - 120) * 4 分钟
   const minuteDiff = (longitude - 120) * 4;
   let adjustedMinutes = originalMinutes + minuteDiff;
-
-  // 日期偏移
   let dayOffset = 0;
 
-  // 跨天处理
   if (adjustedMinutes >= 1440) {
     adjustedMinutes -= 1440;
     dayOffset = 1;
@@ -77,91 +142,77 @@ function adjustTrueSolarTime(birthDateStr: string, birthTimeStr: string, longitu
     dayOffset = -1;
   }
 
-  // 计算调整后的小时和分钟
   const adjustedHour = Math.floor(adjustedMinutes / 60);
   const adjustedMinute = adjustedMinutes % 60;
-
-  // 构建新日期（应用日期偏移）
   const adjustedDate = new Date(year, month - 1, day + dayOffset, adjustedHour, adjustedMinute);
-
-  console.log('原始日期:', birthDateStr, birthTimeStr);
-  console.log('修正后日期:', adjustedDate);
 
   return { date: adjustedDate, hour: adjustedHour, minute: adjustedMinute };
 }
 
-// 计算八字
+// 计算八字（纯JS版）
 function calculateBazi(birthDateStr: string, birthTimeStr: string, longitude: number, isSouthern: boolean) {
-  // 1. 真太阳时修正
-  const { date: adjustedDate } = adjustTrueSolarTime(birthDateStr, birthTimeStr, longitude);
-
-  // 2. 使用 lunar-javascript 获取八字
-  let solar;
   try {
-    solar = Solar.fromYmdHms(
-      adjustedDate.getFullYear(),
-      adjustedDate.getMonth() + 1,
-      adjustedDate.getDate(),
-      adjustedDate.getHours(),
-      adjustedDate.getMinutes(),
-      0
-    );
+    const { date: adjustedDate, hour } = adjustTrueSolarTime(birthDateStr, birthTimeStr, longitude);
+
+    console.log('调整后日期:', adjustedDate, '小时:', hour);
+
+    if (!adjustedDate || isNaN(adjustedDate.getTime())) {
+      throw new Error('Invalid adjusted date');
+    }
+
+    const year = adjustedDate.getFullYear();
+    const month = adjustedDate.getMonth() + 1;
+
+    // 年柱
+    let yearGanZhi = getYearGanZhi(year);
+
+    // 月柱
+    const monthZhi = getMonthZhi(month);
+    const monthGan = getMonthGan(yearGanZhi.charAt(0), month);
+    let monthGanZhi = monthGan + monthZhi;
+
+    // 日柱
+    const dayGanZhi = getDayGanZhi(adjustedDate);
+    if (!dayGanZhi) {
+      throw new Error('Failed to calculate day gan zhi');
+    }
+
+    // 时柱
+    const timeZhi = getTimeZhi(hour);
+    const timeGan = getTimeGan(dayGanZhi.charAt(0), timeZhi);
+    const hourGanZhi = timeGan + timeZhi;
+
+    // 南半球月令对冲
+    if (isSouthern) {
+      const newMonthZhi = southernZhiMap[monthZhi] || monthZhi;
+      monthGanZhi = monthGan + newMonthZhi;
+    }
+
+    // 八字字符串
+    const baziString = `${yearGanZhi} ${monthGanZhi} ${dayGanZhi} ${hourGanZhi}`;
+
+    // 五行统计
+    const allText = yearGanZhi + monthGanZhi + dayGanZhi + hourGanZhi;
+    let wuxingCount = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
+    for (const char of allText) {
+      const wx = wuxingMap[char];
+      if (wx) wuxingCount[wx as keyof typeof wuxingCount]++;
+    }
+    const wuxingString = `木${wuxingCount.木 * 10}% 火${wuxingCount.火 * 10}% 土${wuxingCount.土 * 10}% 金${wuxingCount.金 * 10}% 水${wuxingCount.水 * 10}%`;
+
+    // 大运
+    const startYear = year + 8;
+    const dayunString = `${startYear}岁起运`;
+
+    return {
+      bazi: baziString,
+      wuxing: wuxingString,
+      dayun: dayunString
+    };
   } catch (e) {
-    console.error('Solar.fromYmdHms error:', e);
-    throw new Error('Failed to create solar date');
+    console.error('八字计算错误:', e);
+    return { bazi: '计算失败', wuxing: '', dayun: '' };
   }
-
-  const lunar = solar.getLunar();
-
-  // 获取年柱，月柱，日柱
-  let yearGanZhi = lunar.getYearInGanZhi();      // 年柱
-  let monthGanZhi = lunar.getMonthInGanZhi();    // 月柱
-  let dayGanZhi = lunar.getDayInGanZhi();        // 日柱
-
-  // 时柱：根据调整后的时间计算
-  const zhiArr = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-  const hour = adjustedDate.getHours();
-  const hourZhi = zhiArr[Math.floor((hour + 1) / 2) % 12]; // 时支
-
-  const ganArr = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-  const dayGanIdx = ganArr.indexOf(dayGanZhi.charAt(0));
-  const zhiIdx = zhiArr.indexOf(hourZhi);
-  const hourGanIdx = (dayGanIdx * 2 + zhiIdx) % 10;
-  let hourGanZhi = ganArr[hourGanIdx] + hourZhi;
-
-  // 3. 南半球月令对冲处理
-  if (isSouthern) {
-    // 月支对冲
-    const monthZhi = monthGanZhi.charAt(1);
-    const newMonthZhi = southernZhiMap[monthZhi] || monthZhi;
-    const monthGan = monthGanZhi.charAt(0);
-    monthGanZhi = monthGan + newMonthZhi;
-  }
-
-  // 4. 生成八字字符串
-  const baziString = `${yearGanZhi} ${monthGanZhi} ${dayGanZhi} ${hourGanZhi}`;
-
-  // 5. 计算五行
-  const allGanZhi = yearGanZhi + monthGanZhi + dayGanZhi + hourGanZhi;
-  let wuxingCount = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
-
-  for (const char of allGanZhi) {
-    const wx = wuxingMap[char];
-    if (wx) wuxingCount[wx as keyof typeof wuxingCount]++;
-  }
-
-  const wuxingString = `木${wuxingCount.木 * 10}% 火${wuxingCount.火 * 10}% 土${wuxingCount.土 * 10}% 金${wuxingCount.金 * 10}% 水${wuxingCount.水 * 10}%`;
-
-  // 6. 计算大运（简化版）
-  const birthYear = adjustedDate.getFullYear();
-  const startYear = birthYear + 8; // 默认8岁起运
-  const dayunString = `${startYear}岁起运`;
-
-  return {
-    bazi: baziString,
-    wuxing: wuxingString,
-    dayun: dayunString
-  };
 }
 
 function readOrders(): Order[] {
@@ -186,69 +237,68 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-
-  // 计算八字
-  let baziResult = { bazi: '', wuxing: '', dayun: '' };
   try {
-    baziResult = calculateBazi(
-      body.birthDate,
-      body.birthTime,
-      body.longitude || 120,
-      body.isSouthern || false
-    );
-    console.log('八字计算结果:', baziResult);
-  } catch (err) {
-    console.error('八字计算失败:', err);
-  }
+    const body = await request.json();
 
-  // 发送到 Google Sheets（异步，不阻塞）
-  fetch(GOOGLE_SCRIPT_URL, {
-    method: 'POST',
-    body: new URLSearchParams({
-      name: body.name || '',
-      contact: body.contact || '',
-      birthdate: body.birthDate || '',
-      birthtime: body.birthTime || '',
-      birthplace: body.birthPlace || '',
-      note: body.message || '',
-      language: body.lang || 'zh',
-      longitude: String(body.longitude || 120),
-      is_southern: String(body.isSouthern || false),
+    let baziResult = { bazi: '', wuxing: '', dayun: '' };
+    try {
+      baziResult = calculateBazi(
+        body.birthDate,
+        body.birthTime,
+        body.longitude || 120,
+        body.isSouthern || false
+      );
+    } catch (err) {
+      console.error('八字计算失败:', err);
+    }
+
+    // 发送到 Google Sheets
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      body: new URLSearchParams({
+        name: body.name || '',
+        contact: body.contact || '',
+        birthdate: body.birthDate || '',
+        birthtime: body.birthTime || '',
+        birthplace: body.birthPlace || '',
+        note: body.message || '',
+        language: body.lang || 'zh',
+        longitude: String(body.longitude || 120),
+        is_southern: String(body.isSouthern || false),
+        bazi: baziResult.bazi,
+        wuxing: baziResult.wuxing,
+        dayun: baziResult.dayun,
+      }),
+    }).catch(err => console.error('Google提交失败:', err));
+
+    // 本地保存
+    const orders = readOrders();
+    const newOrder: Order = {
+      id: Date.now().toString(),
+      name: body.name,
+      contact: body.contact,
+      birthDate: body.birthDate,
+      birthTime: body.birthTime,
+      birthPlace: body.birthPlace,
+      message: body.message,
+      lang: body.lang,
+      longitude: body.longitude || 120,
+      isSouthern: body.isSouthern || false,
       bazi: baziResult.bazi,
       wuxing: baziResult.wuxing,
       dayun: baziResult.dayun,
-    }),
-  }).then(res => {
-    console.log('Google Sheets 响应状态:', res.status);
-  }).catch(err => {
-    console.error('Google Sheets 提交失败:', err);
-  });
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    };
 
-  // 本地保存
-  const orders = readOrders();
-  const newOrder: Order = {
-    id: Date.now().toString(),
-    name: body.name,
-    contact: body.contact,
-    birthDate: body.birthDate,
-    birthTime: body.birthTime,
-    birthPlace: body.birthPlace,
-    message: body.message,
-    lang: body.lang,
-    longitude: body.longitude || 120,
-    isSouthern: body.isSouthern || false,
-    bazi: baziResult.bazi,
-    wuxing: baziResult.wuxing,
-    dayun: baziResult.dayun,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-  };
+    orders.unshift(newOrder);
+    writeOrders(orders);
 
-  orders.unshift(newOrder);
-  writeOrders(orders);
-
-  return NextResponse.json({ success: true, order: newOrder });
+    return NextResponse.json({ success: true, order: newOrder });
+  } catch (e) {
+    console.error('API错误:', e);
+    return NextResponse.json({ error: '服务器错误' }, { status: 500 });
+  }
 }
 
 export async function PATCH(request: NextRequest) {
