@@ -9,8 +9,6 @@ export default function QuoteForm() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [longitude, setLongitude] = useState<number>(120);
-  const [isSouthern, setIsSouthern] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,8 +24,6 @@ export default function QuoteForm() {
       birthPlace: formData.get('birthplace'),
       message: formData.get('note'),
       lang: lang,
-      longitude: longitude,
-      isSouthern: isSouthern,
     };
 
     console.log('正在提交...', data);
@@ -118,28 +114,6 @@ export default function QuoteForm() {
             placeholder={isZh ? '如：09:30' : 'e.g., 09:30'}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-zinc-600 dark:bg-zinc-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">{isZh ? '经度' : 'Longitude'}</label>
-          <input
-            type="number"
-            value={longitude}
-            onChange={(e) => setLongitude(parseFloat(e.target.value) || 120)}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300"
-          />
-        </div>
-        <div className="flex items-center">
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={isSouthern}
-              onChange={(e) => setIsSouthern(e.target.checked)}
-            />
-            <span>{isZh ? '南半球' : 'Southern'}</span>
-          </label>
         </div>
       </div>
 

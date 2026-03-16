@@ -45,7 +45,6 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
 
   // 异步发送到 Google Sheets（不阻塞主流程）
-  // 使用 try-catch 确保无论 Google 返回什么，都保证本地保存成功
   fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
     body: new URLSearchParams({
@@ -56,8 +55,6 @@ export async function POST(request: NextRequest) {
       birthplace: body.birthPlace || '',
       note: body.message || '',
       language: body.lang || 'zh',
-      longitude: String(body.longitude || 120),
-      is_southern: String(body.isSouthern || false),
     }),
   }).then(res => {
     console.log('Google Sheets 响应状态:', res.status);
