@@ -44,43 +44,28 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
-  // 先发送到 Google Sheets
-  let googleSuccess = false;
-  try {
-    const formData = new URLSearchParams();
-    formData.append('name', body.name || '');
-    formData.append('contact', body.contact || '');
-    formData.append('birthdate', body.birthDate || '');
-    formData.append('birthtime', body.birthTime || '');
-    formData.append('birthplace', body.birthPlace || '');
-    formData.append('note', body.message || '');
-    formData.append('language', body.lang || 'zh');
-    formData.append('longitude', (body.longitude || 120).toString());
-    formData.append('is_southern', (body.isSouthern || false).toString());
+  // 异步发送到 Google Sheets（不阻塞主流程）
+  // 使用 try-catch 确保无论 Google 返回什么，都保证本地保存成功
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    body: new URLSearchParams({
+      name: body.name || '',
+      contact: body.contact || '',
+      birthdate: body.birthDate || '',
+      birthtime: body.birthTime || '',
+      birthplace: body.birthPlace || '',
+      note: body.message || '',
+      language: body.lang || 'zh',
+      longitude: String(body.longitude || 120),
+      is_southern: String(body.isSouthern || false),
+    }),
+  }).then(res => {
+    console.log('Google Sheets 响应状态:', res.status);
+  }).catch(err => {
+    console.error('Google Sheets 提交失败（后台）:', err);
+  });
 
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      body: formData,
-      redirect: 'manual',
-    });
-
-    // Google Apps Script 返回 302 重定向是正常的
-    if (response.status === 302 || response.status === 0) {
-      googleSuccess = true;
-    } else {
-      const text = await response.text();
-      console.log('Google 响应:', text);
-      if (text.includes('Success') || text.includes('success')) {
-        googleSuccess = true;
-      }
-    }
-  } catch (e) {
-    console.error('Google Sheets 提交失败:', e);
-  }
-
-  console.log('Google Sheets 提交结果:', googleSuccess ? '成功' : '失败');
-
-  // 同时保存到本地 JSON 文件
+  // 本地保存订单（保证成功）
   const orders = readOrders();
   const newOrder: Order = {
     id: Date.now().toString(),
@@ -98,6 +83,7 @@ export async function POST(request: NextRequest) {
   orders.unshift(newOrder);
   writeOrders(orders);
 
+  // 无论 Google 返回什么，都返回成功给前端
   return NextResponse.json({ success: true, order: newOrder });
 }
 
