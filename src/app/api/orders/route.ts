@@ -16,6 +16,8 @@ interface Order {
   birthPlace: string;
   message: string;
   lang: string;
+  longitude: number;
+  isSouthern: boolean;
   status: 'pending' | 'confirmed' | 'paid' | 'completed';
   createdAt: string;
 }
@@ -55,6 +57,8 @@ export async function POST(request: NextRequest) {
       birthplace: body.birthPlace || '',
       note: body.message || '',
       language: body.lang || 'zh',
+      longitude: String(body.longitude || 120),
+      is_southern: String(body.isSouthern || false),
     }),
   }).then(res => {
     console.log('Google Sheets 响应状态:', res.status);
@@ -73,6 +77,8 @@ export async function POST(request: NextRequest) {
     birthPlace: body.birthPlace,
     message: body.message,
     lang: body.lang,
+    longitude: body.longitude || 120,
+    isSouthern: body.isSouthern || false,
     status: 'pending',
     createdAt: new Date().toISOString(),
   };
