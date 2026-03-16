@@ -4,6 +4,9 @@ import path from 'path';
 
 const ordersFile = path.join(process.cwd(), 'src/data/orders.json');
 
+// Google Apps Script API URL
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzZ9YHlJE_It6JfRLDQVXkXURtdNqN4t0XQx0JA7reLPclRCEKw7nwbVkODoPBxSoEP/exec';
+
 interface Order {
   id: string;
   name: string;
@@ -40,11 +43,39 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const orders = readOrders();
 
+  // 先发送到 Google Sheets
+  try {
+    const formData = new URLSearchParams();
+    formData.append('name', body.name || '');
+    formData.append('contact', body.contact || '');
+    formData.append('birthdate', body.birthDate || '');
+    formData.append('birthtime', body.birthTime || '');
+    formData.append('birthplace', body.birthPlace || '');
+    formData.append('note', body.message || '');
+    formData.append('language', body.lang || 'zh');
+    formData.append('longitude', (body.longitude || 120).toString());
+    formData.append('is_southern', (body.isSouthern || false).toString());
+
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      body: formData,
+    });
+  } catch (e) {
+    console.error('Google Sheets 提交失败:', e);
+  }
+
+  // 同时保存到本地 JSON 文件
+  const orders = readOrders();
   const newOrder: Order = {
     id: Date.now().toString(),
-    ...body,
+    name: body.name,
+    contact: body.contact,
+    birthDate: body.birthDate,
+    birthTime: body.birthTime,
+    birthPlace: body.birthPlace,
+    message: body.message,
+    lang: body.lang,
     status: 'pending',
     createdAt: new Date().toISOString(),
   };

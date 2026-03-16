@@ -2,10 +2,6 @@
 
 import { useState } from 'react';
 import { useLanguage } from './LanguageContext';
-import { calculateBazi, formatBaziString } from '@/utils/baziEngine';
-
-// Google Apps Script API URL
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzZ9YHlJE_It6JfRLDQVXkXURtdNqN4t0XQx0JA7reLPclRCEKw7nwbVkODoPBxSoEP/exec';
 
 export default function QuoteForm() {
   const { t, lang } = useLanguage();
@@ -22,43 +18,35 @@ export default function QuoteForm() {
     setError('');
 
     const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get('name'),
+      contact: formData.get('contact'),
+      birthDate: formData.get('birthdate'),
+      birthTime: formData.get('birthtime'),
+      birthPlace: formData.get('birthplace'),
+      message: formData.get('note'),
+      lang: lang,
+      longitude: longitude,
+      isSouthern: isSouthern,
+    };
 
-    // 计算八字（后台进行，不显示给用户）
-    const birthDate = formData.get('birthdate') as string;
-    const birthTime = formData.get('birthtime') as string;
-
-    // 计算八字（后台进行，不显示给用户）
-    if (birthDate && birthTime) {
-      try {
-        const baziResult = calculateBazi(birthDate, birthTime, longitude, isSouthern);
-        const baziString = formatBaziString(baziResult);
-        formData.append('bazi', baziString);
-        formData.append('bazi_detail', JSON.stringify(baziResult));
-      } catch (err) {
-        console.error('八字计算错误:', err);
-      }
-    }
-
-    // 添加经度和南半球信息
-    formData.append('longitude', longitude.toString());
-    formData.append('is_southern', isSouthern.toString());
+    console.log('正在提交...', data);
 
     try {
-      const res = await fetch(GOOGLE_SCRIPT_URL, {
+      const res = await fetch('/api/orders', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
       });
-
-      const data = await res.json();
-
-      if (data.result === 'success') {
+      const result = await res.json();
+      if (result.success) {
         setSubmitted(true);
       } else {
-        setError(data.error || '提交失败，请重试');
+        setError(result.error || '提交失败');
       }
     } catch (err) {
       console.error(err);
-      setError('网络错误，请稍后重试');
+      setError('网络错误');
     } finally {
       setLoading(false);
     }
@@ -124,34 +112,24 @@ export default function QuoteForm() {
         </div>
       </div>
 
-      {/* 真太阳时修正和南半球开关 */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">
-            {isZh ? '出生经度（可选）' : 'Longitude (optional)'}
-          </label>
+          <label className="block text-sm font-medium mb-1">{isZh ? '经度' : 'Longitude'}</label>
           <input
             type="number"
             value={longitude}
             onChange={(e) => setLongitude(parseFloat(e.target.value) || 120)}
-            step="0.1"
-            min="-180"
-            max="180"
-            placeholder={isZh ? '默认120（北京）' : 'Default 120 (Beijing)'}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-zinc-600 dark:bg-zinc-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300"
           />
         </div>
         <div className="flex items-center">
-          <label className="flex items-center space-x-3 cursor-pointer">
+          <label className="flex items-center space-x-2">
             <input
               type="checkbox"
               checked={isSouthern}
               onChange={(e) => setIsSouthern(e.target.checked)}
-              className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
             />
-            <span className="text-sm font-medium">
-              {isZh ? '南半球出生' : 'Southern Hemisphere'}
-            </span>
+            <span>{isZh ? '南半球' : 'Southern'}</span>
           </label>
         </div>
       </div>
