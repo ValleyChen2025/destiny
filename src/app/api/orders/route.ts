@@ -44,8 +44,19 @@ const wuxingMap: Record<string, string> = {
 
 // 真太阳时修正（含日期跨天处理）
 function adjustTrueSolarTime(birthDateStr: string, birthTimeStr: string, longitude: number): { date: Date; hour: number; minute: number } {
-  const [year, month, day] = birthDateStr.split('-').map(Number);
-  const [hour, minute] = birthTimeStr.split(':').map(Number);
+  // 解析日期字符串
+  const dateParts = birthDateStr.split('-').map(Number);
+  if (dateParts.some(isNaN)) {
+    throw new Error(`Invalid date: ${birthDateStr}`);
+  }
+  const [year, month, day] = dateParts;
+
+  // 解析时间字符串
+  const timeParts = birthTimeStr.split(':').map(Number);
+  if (timeParts.some(isNaN)) {
+    throw new Error(`Invalid time: ${birthTimeStr}`);
+  }
+  const [hour, minute] = timeParts;
 
   // 原始分钟数
   const originalMinutes = hour * 60 + minute;
@@ -73,6 +84,9 @@ function adjustTrueSolarTime(birthDateStr: string, birthTimeStr: string, longitu
   // 构建新日期（应用日期偏移）
   const adjustedDate = new Date(year, month - 1, day + dayOffset, adjustedHour, adjustedMinute);
 
+  console.log('原始日期:', birthDateStr, birthTimeStr);
+  console.log('修正后日期:', adjustedDate);
+
   return { date: adjustedDate, hour: adjustedHour, minute: adjustedMinute };
 }
 
@@ -82,14 +96,38 @@ function calculateBazi(birthDateStr: string, birthTimeStr: string, longitude: nu
   const { date: adjustedDate } = adjustTrueSolarTime(birthDateStr, birthTimeStr, longitude);
 
   // 2. 使用 lunar-javascript 获取八字
-  const solar = Solar.fromDate(adjustedDate);
+  let solar;
+  try {
+    solar = Solar.fromYmdHms(
+      adjustedDate.getFullYear(),
+      adjustedDate.getMonth() + 1,
+      adjustedDate.getDate(),
+      adjustedDate.getHours(),
+      adjustedDate.getMinutes(),
+      0
+    );
+  } catch (e) {
+    console.error('Solar.fromYmdHms error:', e);
+    throw new Error('Failed to create solar date');
+  }
+
   const lunar = solar.getLunar();
 
-  // 获取四柱
+  // 获取年柱，月柱，日柱
   let yearGanZhi = lunar.getYearInGanZhi();      // 年柱
   let monthGanZhi = lunar.getMonthInGanZhi();    // 月柱
   let dayGanZhi = lunar.getDayInGanZhi();        // 日柱
-  let hourGanZhi = lunar.getHourInGanZhi();      // 时柱
+
+  // 时柱：根据调整后的时间计算
+  const zhiArr = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+  const hour = adjustedDate.getHours();
+  const hourZhi = zhiArr[Math.floor((hour + 1) / 2) % 12]; // 时支
+
+  const ganArr = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+  const dayGanIdx = ganArr.indexOf(dayGanZhi.charAt(0));
+  const zhiIdx = zhiArr.indexOf(hourZhi);
+  const hourGanIdx = (dayGanIdx * 2 + zhiIdx) % 10;
+  let hourGanZhi = ganArr[hourGanIdx] + hourZhi;
 
   // 3. 南半球月令对冲处理
   if (isSouthern) {
@@ -112,18 +150,9 @@ function calculateBazi(birthDateStr: string, birthTimeStr: string, longitude: nu
     if (wx) wuxingCount[wx as keyof typeof wuxingCount]++;
   }
 
-  const total = 10; // 八字共10个字
   const wuxingString = `木${wuxingCount.木 * 10}% 火${wuxingCount.火 * 10}% 土${wuxingCount.土 * 10}% 金${wuxingCount.金 * 10}% 水${wuxingCount.水 * 10}%`;
 
-  // 6. 计算大运（简化版：根据日干和性别）
-  const dayGan = dayGanZhi.charAt(0);
-  const dayIdx = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'].indexOf(dayGan);
-
-  // 大运干支顺序
-  const dayunGan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-  const dayunZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-
-  // 简单起运计算（实际需要结合性别，这里用简化公式）
+  // 6. 计算大运（简化版）
   const birthYear = adjustedDate.getFullYear();
   const startYear = birthYear + 8; // 默认8岁起运
   const dayunString = `${startYear}岁起运`;
