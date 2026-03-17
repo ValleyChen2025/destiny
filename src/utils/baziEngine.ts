@@ -54,6 +54,15 @@ function getTimeGan(dayGan: string, timeZhi: string): string {
   return GAN[(offset + zhiIdx) % 10];
 }
 
+// 五行对应表
+const wuxingMap: Record<string, string> = {
+  '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
+  '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水',
+  '子': '水', '丑': '土', '寅': '木', '卯': '木', '辰': '土',
+  '巳': '火', '午': '火', '未': '土', '申': '金', '酉': '金',
+  '戌': '土', '亥': '水'
+};
+
 export interface BaziResult {
   yearGanZhi: string;
   monthGanZhi: string;
@@ -62,6 +71,13 @@ export interface BaziResult {
   solarTerm: string;
   isSouthern: boolean;
   trueSolarTime: string;
+}
+
+// 简化版返回格式（兼容现有代码）
+export interface SimpleBaziResult {
+  bazi: string;
+  wuxing: string;
+  dayun: string;
 }
 
 export function calculateBazi(
@@ -139,4 +155,28 @@ export function calculateBazi(
 
 export function formatBaziString(result: BaziResult): string {
   return `${result.yearGanZhi}年 ${result.monthGanZhi}月 ${result.dayGanZhi}日 ${result.timeGanZhi}时`;
+}
+
+// 转换为简化格式（包含八字、五行、大运）
+export function toSimpleResult(result: BaziResult, birthYear: number): SimpleBaziResult {
+  const baziString = `${result.yearGanZhi} ${result.monthGanZhi} ${result.dayGanZhi} ${result.timeGanZhi}`;
+
+  // 五行统计
+  const allText = result.yearGanZhi + result.monthGanZhi + result.dayGanZhi + result.timeGanZhi;
+  let wuxingCount = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
+  for (const char of allText) {
+    const wx = wuxingMap[char];
+    if (wx) wuxingCount[wx as keyof typeof wuxingCount]++;
+  }
+  const wuxingString = `木${wuxingCount.木 * 10}% 火${wuxingCount.火 * 10}% 土${wuxingCount.土 * 10}% 金${wuxingCount.金 * 10}% 水${wuxingCount.水 * 10}%`;
+
+  // 大运从8岁起
+  const startYear = birthYear + 8;
+  const dayunString = `${startYear}岁起运`;
+
+  return {
+    bazi: baziString,
+    wuxing: wuxingString,
+    dayun: dayunString
+  };
 }
