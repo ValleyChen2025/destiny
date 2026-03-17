@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { calculateBazi, toSimpleResult, formatBaziString, BaziResult } from '@/utils/baziEngine';
 
 const ordersFile = path.join(process.cwd(), 'src/data/orders.json');
 
@@ -51,35 +50,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // 解析出生年份
-    let birthYear = new Date().getFullYear();
-    try {
-      const dateParts = body.birthDate?.split('-');
-      if (dateParts && dateParts[0]) {
-        birthYear = parseInt(dateParts[0], 10);
-      }
-    } catch (e) {
-      console.error('解析出生年份失败:', e);
-    }
-
-    // 计算八字
-    let simpleResult = { bazi: '', wuxing: '', dayun: '' };
-    try {
-      const baziResult = calculateBazi(
-        body.birthDate,
-        body.birthTime,
-        body.longitude || 120,
-        body.isSouthern || false
-      );
-      simpleResult = toSimpleResult(baziResult, birthYear);
-      console.log('八字计算成功:', simpleResult);
-    } catch (err) {
-      console.error('八字计算失败:', err);
-    }
-
-    const baziResult = simpleResult;
-
-    // 发送到 Google Sheets
+    // 直接提交到 Google Sheets（暂不计算八字）
     fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
       body: new URLSearchParams({
@@ -92,9 +63,9 @@ export async function POST(request: NextRequest) {
         language: body.lang || 'zh',
         longitude: String(body.longitude || 120),
         is_southern: String(body.isSouthern || false),
-        bazi: baziResult.bazi,
-        wuxing: baziResult.wuxing,
-        dayun: baziResult.dayun,
+        bazi: '',
+        wuxing: '',
+        dayun: '',
       }),
     }).catch(err => console.error('Google提交失败:', err));
 
@@ -111,9 +82,9 @@ export async function POST(request: NextRequest) {
       lang: body.lang,
       longitude: body.longitude || 120,
       isSouthern: body.isSouthern || false,
-      bazi: baziResult.bazi,
-      wuxing: baziResult.wuxing,
-      dayun: baziResult.dayun,
+      bazi: '',
+      wuxing: '',
+      dayun: '',
       status: 'pending',
       createdAt: new Date().toISOString(),
     };
