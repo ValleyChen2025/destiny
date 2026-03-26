@@ -122,16 +122,9 @@ export function calculateBazi(
       dayunStartAge = 1;
     }
 
-    // 简化：使用 lunar-javascript 的大运计算
-    // 大运从月令开始，阳顺阴逆
-    const daYun = lunar.getDaYun();
-    if (daYun && daYun.length > 0) {
-      // 获取第一个大运的开始年龄
-      const firstDaYun = daYun[0];
-      dayunStartAge = firstDaYun.getStartAge() || 1;
-    } else {
-      dayunStartAge = 1;
-    }
+    // 简化：大运计算（暂时使用默认值）
+    // 实际需要更复杂的节气和中气计算
+    dayunStartAge = Math.floor((new Date().getFullYear() - year) / 10) + 1;
 
     return {
       yearGanZhi,
@@ -154,6 +147,7 @@ export function calculateBazi(
       solarTerm: '',
       isSouthern,
       trueSolarTime: '0:0',
+      dayunStartAge: 1,
     };
   }
 }
