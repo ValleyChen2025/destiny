@@ -70,6 +70,32 @@
     "wise": "Wise",
     "note": "付款后请截图保存，我们将与您确认"
   },
+  "bazi": {
+    "title": "生辰八字算命",
+    "subtitle": "精确到节气的八字排盘",
+    "birthDate": "出生日期",
+    "birthTime": "出生时辰",
+    "gender": "性别",
+    "male": "男",
+    "female": "女",
+    "calculate": "免费测算",
+    "calculating": "计算中...",
+    "yearPillar": "年柱",
+    "monthPillar": "月柱",
+    "dayPillar": "日柱",
+    "timePillar": "时柱",
+    "birthday": "出生时间",
+    "genderLabel": "性别",
+    "complete": "完整命书分析请联系客服"
+  },
+  "wannianrili": {
+    "title": "万年日历",
+    "subtitle": "查询吉凶宜忌",
+    "today": "回到今天",
+    "yi": "宜",
+    "ji": "忌",
+    "ganzhi": "干支"
+  },
   "articles": {
     "title": "文章"
   },

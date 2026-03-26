@@ -70,6 +70,32 @@
     "wise": "Wise",
     "note": "Please save your payment screenshot for confirmation"
   },
+  "bazi": {
+    "title": "Bazi Fortune Telling",
+    "subtitle": "Accurate Bazi calculation by solar terms",
+    "birthDate": "Birth Date",
+    "birthTime": "Birth Time",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "calculate": "Free Calculation",
+    "calculating": "Calculating...",
+    "yearPillar": "Year",
+    "monthPillar": "Month",
+    "dayPillar": "Day",
+    "timePillar": "Hour",
+    "birthday": "Birthday",
+    "genderLabel": "Gender",
+    "complete": "Contact us for complete analysis"
+  },
+  "wannianrili": {
+    "title": "Chinese Calendar",
+    "subtitle": "Check daily good/bad luck",
+    "today": "Today",
+    "yi": "Good for",
+    "ji": "Avoid",
+    "ganzhi": "GanZhi"
+  },
   "articles": {
     "title": "Articles"
   },

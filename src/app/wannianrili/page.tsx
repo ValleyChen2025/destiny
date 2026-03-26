@@ -1,13 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function WannianriliPage() {
+  const { lang, t } = useLanguage();
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [selectedDay, setSelectedDay] = useState<any>(null);
 
-  const weekDays = ['一', '二', '三', '四', '五', '六', '日'];
+  const weekDays = lang === 'zh'
+    ? ['一', '二', '三', '四', '五', '六', '日']
+    : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   // 农历数据（简化版）
   const lunarMonths = ['正月','二月','三月','四月','五月','六月','七月','八月','九月','十月','冬月','腊月'];
@@ -101,8 +105,8 @@ export default function WannianriliPage() {
       <div className="max-w-4xl mx-auto">
         {/* 标题 */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">万年日历</h1>
-          <p className="text-gray-600">查询吉凶宜忌</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">{t.wannianrili.title}</h1>
+          <p className="text-gray-600">{t.wannianrili.subtitle}</p>
         </div>
 
         {/* 年月选择 */}
@@ -126,7 +130,7 @@ export default function WannianriliPage() {
               className="px-4 py-2 border border-gray-300 rounded-lg"
             >
               {Array.from({ length: 201 }, (_, i) => 1900 + i).map(y => (
-                <option key={y} value={y}>{y}年</option>
+                <option key={y} value={y}>{lang === 'zh' ? `${y}年` : y}</option>
               ))}
             </select>
             <button
@@ -160,7 +164,7 @@ export default function WannianriliPage() {
               className="px-4 py-2 border border-gray-300 rounded-lg"
             >
               {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                <option key={m} value={m}>{m}月</option>
+                <option key={m} value={m}>{lang === 'zh' ? `${m}月` : m}</option>
               ))}
             </select>
             <button
@@ -184,7 +188,7 @@ export default function WannianriliPage() {
               }}
               className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
             >
-              回到今天
+              {t.wannianrili.today}
             </button>
           </div>
         </div>
@@ -234,12 +238,15 @@ export default function WannianriliPage() {
         {selectedDay && (
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-xl font-bold text-center mb-4">
-              {currentYear}年{currentMonth}月{selectedDay.day}日
+              {lang === 'zh'
+                ? `${currentYear}年${currentMonth}月${selectedDay.day}日`
+                : `${currentYear}-${currentMonth}-${selectedDay.day}`
+              }
             </h3>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="bg-green-50 p-4 rounded-lg">
-                <div className="font-bold text-green-700 mb-2">宜</div>
+                <div className="font-bold text-green-700 mb-2">{t.wannianrili.yi}</div>
                 <div className="flex flex-wrap gap-2">
                   {getDayDetail(selectedDay)?.yi.map((item: string) => (
                     <span key={item} className="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">
@@ -250,7 +257,7 @@ export default function WannianriliPage() {
               </div>
 
               <div className="bg-red-50 p-4 rounded-lg">
-                <div className="font-bold text-red-700 mb-2">忌</div>
+                <div className="font-bold text-red-700 mb-2">{t.wannianrili.ji}</div>
                 <div className="flex flex-wrap gap-2">
                   {getDayDetail(selectedDay)?.ji.map((item: string) => (
                     <span key={item} className="px-2 py-1 bg-red-100 text-red-700 rounded text-sm">
@@ -262,7 +269,7 @@ export default function WannianriliPage() {
             </div>
 
             <div className="mt-4 text-center text-gray-600">
-              干支: {getDayDetail(selectedDay)?.ganzhi}
+              {t.wannianrili.ganzhi}: {getDayDetail(selectedDay)?.ganzhi}
             </div>
           </div>
         )}

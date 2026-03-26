@@ -18,6 +18,28 @@ export default function Header() {
 
           <div className="flex items-center gap-4">
             <Link
+              href="/bazi"
+              className={`text-sm px-3 py-1 rounded-full transition-colors ${
+                pathname === '/bazi'
+                  ? 'bg-blue-600 text-white'
+                  : 'hover:bg-gray-100 dark:hover:bg-zinc-800'
+              }`}
+            >
+              {lang === 'zh' ? '八字' : 'Bazi'}
+            </Link>
+
+            <Link
+              href="/wannianrili"
+              className={`text-sm px-3 py-1 rounded-full transition-colors ${
+                pathname === '/wannianrili'
+                  ? 'bg-blue-600 text-white'
+                  : 'hover:bg-gray-100 dark:hover:bg-zinc-800'
+              }`}
+            >
+              {lang === 'zh' ? '万年历' : 'Calendar'}
+            </Link>
+
+            <Link
               href="/quote"
               className={`text-sm px-3 py-1 rounded-full transition-colors ${
                 pathname === '/quote'

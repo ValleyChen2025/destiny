@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function BaziPage() {
+  const { lang, t } = useLanguage();
   const [dateInput, setDateInput] = useState('1990-01-15');
   const [timeVal, setTimeVal] = useState(13);
   const [genderVal, setGenderVal] = useState(1);
@@ -56,8 +58,8 @@ export default function BaziPage() {
       <div className="max-w-4xl mx-auto">
         {/* 标题 */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">生辰八字算命</h1>
-          <p className="text-gray-600">精确到节气的八字排盘</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">{t.bazi.title}</h1>
+          <p className="text-gray-600">{t.bazi.subtitle}</p>
         </div>
 
         {/* 表单 */}
@@ -66,7 +68,7 @@ export default function BaziPage() {
             {/* 日期输入 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                出生日期
+                {t.bazi.birthDate}
               </label>
               <input
                 type="date"
@@ -79,7 +81,7 @@ export default function BaziPage() {
             {/* 时辰选择 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                出生时辰
+                {t.bazi.birthTime}
               </label>
               <select
                 value={timeVal}
@@ -104,15 +106,15 @@ export default function BaziPage() {
             {/* 性别 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                性别
+                {t.bazi.gender}
               </label>
               <select
                 value={genderVal}
                 onChange={(e) => setGenderVal(Number(e.target.value))}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value={1}>男</option>
-                <option value={2}>女</option>
+                <option value={1}>{t.bazi.male}</option>
+                <option value={2}>{t.bazi.female}</option>
               </select>
             </div>
           </div>
@@ -122,7 +124,7 @@ export default function BaziPage() {
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 disabled:opacity-50"
           >
-            {loading ? '计算中...' : '免费测算'}
+            {loading ? t.bazi.calculating : t.bazi.calculate}
           </button>
 
           {error && (
@@ -136,26 +138,26 @@ export default function BaziPage() {
         {result && (
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-bold text-center mb-6">
-              {result.birthday} {genderVal === 1 ? '男' : '女'}命
+              {result.birthday} {genderVal === 1 ? t.bazi.male : t.bazi.female}{lang === 'zh' ? '命' : ''}
             </h2>
 
             {/* 八字盘 */}
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
               <div className="flex justify-center gap-4 flex-wrap">
                 <div className="text-center">
-                  <div className="text-sm text-gray-500 mb-1">年柱</div>
+                  <div className="text-sm text-gray-500 mb-1">{t.bazi.yearPillar}</div>
                   <div className="text-3xl font-bold text-blue-600">{result.year}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-sm text-gray-500 mb-1">月柱</div>
+                  <div className="text-sm text-gray-500 mb-1">{t.bazi.monthPillar}</div>
                   <div className="text-3xl font-bold text-blue-600">{result.month}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-sm text-gray-500 mb-1">日柱</div>
+                  <div className="text-sm text-gray-500 mb-1">{t.bazi.dayPillar}</div>
                   <div className="text-3xl font-bold text-blue-600">{result.day}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-sm text-gray-500 mb-1">时柱</div>
+                  <div className="text-sm text-gray-500 mb-1">{t.bazi.timePillar}</div>
                   <div className="text-3xl font-bold text-blue-600">{result.time}</div>
                 </div>
               </div>
@@ -163,8 +165,8 @@ export default function BaziPage() {
 
             {/* 说明 */}
             <div className="text-center text-gray-600 text-sm">
-              <p>八字已精确计算，包含节气修正</p>
-              <p className="mt-2">完整命书分析请联系客服</p>
+              <p>{lang === 'zh' ? '八字已精确计算，包含节气修正' : 'Bazi calculated with solar term corrections'}</p>
+              <p className="mt-2">{t.bazi.complete}</p>
             </div>
           </div>
         )}
