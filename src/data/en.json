@@ -1,9 +1,9 @@
 {
   "site": {
-    "title": "Destiny Analysis",
+    "title": "AI Destiny Report",
     "subtitle": "Know Your Fate · Seize Your Future",
-    "price": "$360",
-    "priceNote": "starting"
+    "price": "$0.99",
+    "priceNote": ""
   },
   "nav": {
     "home": "Home",

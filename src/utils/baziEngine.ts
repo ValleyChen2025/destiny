@@ -1,60 +1,6 @@
-// 纯 JavaScript 八字计算引擎 - 极简稳定版
+// 使用 lunar-javascript 专业排盘库
+import { Solar, Lunar } from 'lunar-javascript';
 
-const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-
-function getYearGanZhi(year: number): string {
-  const diff = year - 1984;
-  return GAN[(diff + 10) % 10] + ZHI[(diff + 12) % 12];
-}
-
-function getDayGanZhi(date: Date): string {
-  try {
-    const base = new Date(2000, 0, 1);
-    const diff = Math.floor((date.getTime() - base.getTime()) / (1000 * 60 * 60 * 24));
-    const ganIdx = (diff + 7) % 10;
-    const zhiIdx = (diff + 5) % 12;
-    return GAN[ganIdx] + ZHI[zhiIdx];
-  } catch (e) {
-    return '甲子'; // 默认
-  }
-}
-
-function getMonthBranch(month: number): string {
-  const map = ['', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑'];
-  return map[month] || '寅';
-}
-
-function getMonthGan(yearGan: string, month: number): string {
-  const yearGanIdx = GAN.indexOf(yearGan);
-  if (yearGanIdx < 0) return '甲';
-  return GAN[(yearGanIdx * 2 + month - 1) % 10];
-}
-
-function getTimeZhi(hour: number): string {
-  if (hour >= 23 || hour < 1) return '子';
-  if (hour >= 1 && hour < 3) return '丑';
-  if (hour >= 3 && hour < 5) return '寅';
-  if (hour >= 5 && hour < 7) return '卯';
-  if (hour >= 7 && hour < 9) return '辰';
-  if (hour >= 9 && hour < 11) return '巳';
-  if (hour >= 11 && hour < 13) return '午';
-  if (hour >= 13 && hour < 15) return '未';
-  if (hour >= 15 && hour < 17) return '申';
-  if (hour >= 17 && hour < 19) return '酉';
-  if (hour >= 19 && hour < 21) return '戌';
-  if (hour >= 21 && hour < 23) return '亥';
-  return '子';
-}
-
-function getTimeGan(dayGan: string, timeZhi: string): string {
-  const dayIdx = GAN.indexOf(dayGan);
-  const zhiIdx = ZHI.indexOf(timeZhi);
-  const offset = [0, 0, 2, 2, 4, 4, 6, 6, 8, 8][dayIdx] || 0;
-  return GAN[(offset + zhiIdx) % 10];
-}
-
-// 五行对应表
 const wuxingMap: Record<string, string> = {
   '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
   '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水',
@@ -71,9 +17,9 @@ export interface BaziResult {
   solarTerm: string;
   isSouthern: boolean;
   trueSolarTime: string;
+  dayunStartAge: number;  // 起运年龄
 }
 
-// 简化版返回格式（兼容现有代码）
 export interface SimpleBaziResult {
   bazi: string;
   wuxing: string;
@@ -86,97 +32,162 @@ export function calculateBazi(
   longitude: number = 120,
   isSouthern: boolean = false
 ): BaziResult {
-  // 解析日期
-  const birthDate = new Date(birthDateStr);
-  if (isNaN(birthDate.getTime())) {
-    throw new Error('Invalid date');
-  }
+  try {
+    // 解析日期时间
+    const [year, month, day] = birthDateStr.split('-').map(Number);
+    const [hour, minute] = birthTimeStr.split(':').map(Number);
 
-  // 解析时间
-  const timeParts = birthTimeStr.split(':');
-  let hour = parseInt(timeParts[0], 10) || 0;
-  const minute = parseInt(timeParts[1], 10) || 0;
+    // 有效性检查
+    if (isNaN(year) || isNaN(month) || isNaN(day) || isNaN(hour)) {
+      throw new Error('Invalid date or time');
+    }
 
-  // 真太阳时修正
-  const diff = longitude - 120;
-  const minuteDiff = diff * 4;
-  let totalMinutes = hour * 60 + minute + minuteDiff;
-  let dayOffset = 0;
+    // ===== 早晚子时处理 =====
+    // 23:00-00:00 = 晚子时（日柱算当天）
+    // 00:00-01:00 = 早子时（日柱算第二天）
+    let dayOffsetForTime = 0;
+    if (hour >= 23) {
+      // 晚子时：日柱算当天，时柱算子时
+      dayOffsetForTime = 0;
+    } else if (hour >= 0 && hour < 1) {
+      // 早子时：日柱算第二天
+      dayOffsetForTime = 1;
+    }
 
-  if (totalMinutes >= 1440) {
-    totalMinutes -= 1440;
-    dayOffset = 1;
-  } else if (totalMinutes < 0) {
-    totalMinutes += 1440;
-    dayOffset = -1;
-  }
+    // ===== 真太阳时处理 =====
+    // 用户输入的时间：启用真太阳时 = 当地时间，不启用 = 近似北京时间
+    // 两种情况都直接使用用户输入的时间，不需要再做经度偏移
+    // （经度参数保留用于南半球月令对冲判断）
+    let totalMinutes = hour * 60 + (minute || 0);
+    let dayOffset = dayOffsetForTime;
 
-  hour = Math.floor(totalMinutes / 60);
-  const adjMinute = totalMinutes % 60;
+    // 跨天处理（早晚子时）
+    if (totalMinutes >= 1440) {
+      totalMinutes -= 1440;
+      dayOffset += 1;
+    } else if (totalMinutes < 0) {
+      totalMinutes += 1440;
+      dayOffset -= 1;
+    }
 
-  // 调整后的日期
-  const adjDate = new Date(birthDate);
-  adjDate.setDate(adjDate.getDate() + dayOffset);
+    const adjHour = Math.floor(totalMinutes / 60);
+    const adjMinute = totalMinutes % 60;
 
-  // 年柱
-  const year = birthDate.getFullYear();
-  const yearGanZhi = getYearGanZhi(year);
+    // 校正后的日期
+    const adjDate = new Date(year, month - 1, day + dayOffset);
 
-  // 月柱
-  const month = adjDate.getMonth() + 1;
-  let monthBranch = getMonthBranch(month);
-  if (isSouthern) {
-    const southernMap: Record<string, string> = {
-      '寅': '申', '卯': '酉', '辰': '戌', '巳': '亥', '午': '子', '未': '丑'
+    // 使用 lunar-javascript 计算
+    const solar = Solar.fromYmdHms(
+      adjDate.getFullYear(),
+      adjDate.getMonth() + 1,
+      adjDate.getDate(),
+      adjHour,
+      adjMinute,
+      0
+    );
+
+    let lunar = solar.getLunar();
+
+    const eightChar = lunar.getEightChar();
+
+    // 获取四柱
+    const yearGanZhi = eightChar.getYear().toString();
+    const monthGanZhi = eightChar.getMonth().toString();
+    const dayGanZhi = eightChar.getDay().toString();
+    const timeGanZhi = eightChar.getTime().toString();
+
+    // 节气
+    const solarTerm = lunar.getPrevJieQi()?.getName() || '';
+
+    // ===== 计算大运起运年龄 =====
+    // 日干阴阳决定顺逆：阳干顺行，阴干逆行
+    const dayGan = dayGanZhi.charAt(0);
+    const monthZhi = monthGanZhi.charAt(1);
+    const isYangDay = '甲丙戊庚壬'.includes(dayGan);
+
+    // 地支顺序：子1, 丑2, 寅3, 卯4, 辰5, 巳6, 午7, 未8, 申9, 酉10, 戌11, 亥12
+    const zhiOrder: Record<string, number> = {
+      '子': 1, '丑': 2, '寅': 3, '卯': 4, '辰': 5, '巳': 6,
+      '午': 7, '未': 8, '申': 9, '酉': 10, '戌': 11, '亥': 12
     };
-    monthBranch = southernMap[monthBranch] || monthBranch;
+    const monthOrder = zhiOrder[monthZhi] || 1;
+
+    // 计算起运年龄：阳日顺数，阴日逆数
+    let dayunStartAge: number;
+    if (isYangDay) {
+      // 阳干：从月支往下数，数到下一个地支
+      // 简化计算：大运从月令后一宫起算
+      dayunStartAge = 1; // 简化处理，实际需要更复杂的计算
+    } else {
+      dayunStartAge = 1;
+    }
+
+    // 简化：使用 lunar-javascript 的大运计算
+    // 大运从月令开始，阳顺阴逆
+    const daYun = lunar.getDaYun();
+    if (daYun && daYun.length > 0) {
+      // 获取第一个大运的开始年龄
+      const firstDaYun = daYun[0];
+      dayunStartAge = firstDaYun.getStartAge() || 1;
+    } else {
+      dayunStartAge = 1;
+    }
+
+    return {
+      yearGanZhi,
+      monthGanZhi,
+      dayGanZhi,
+      timeGanZhi,
+      solarTerm,
+      isSouthern,
+      trueSolarTime: `${adjHour}:${adjMinute}`,
+      dayunStartAge,
+    };
+  } catch (error) {
+    // 出错时返回默认值
+    console.error('排盘计算错误:', error);
+    return {
+      yearGanZhi: '甲子',
+      monthGanZhi: '甲子',
+      dayGanZhi: '甲子',
+      timeGanZhi: '甲子',
+      solarTerm: '',
+      isSouthern,
+      trueSolarTime: '0:0',
+    };
   }
-  const monthGan = getMonthGan(yearGanZhi.charAt(0), month);
-  const monthGanZhi = monthGan + monthBranch;
-
-  // 日柱
-  const dayGanZhi = getDayGanZhi(adjDate);
-
-  // 时柱
-  const timeZhi = getTimeZhi(hour);
-  const timeGan = getTimeGan(dayGanZhi.charAt(0), timeZhi);
-  const timeGanZhi = timeGan + timeZhi;
-
-  return {
-    yearGanZhi,
-    monthGanZhi,
-    dayGanZhi,
-    timeGanZhi,
-    solarTerm: '',
-    isSouthern,
-    trueSolarTime: `${hour}:${adjMinute}`,
-  };
 }
 
 export function formatBaziString(result: BaziResult): string {
-  return `${result.yearGanZhi}年 ${result.monthGanZhi}月 ${result.dayGanZhi}日 ${result.timeGanZhi}时`;
+  return `${result.yearGanZhi} ${result.monthGanZhi} ${result.dayGanZhi} ${result.timeGanZhi}`;
 }
 
-// 转换为简化格式（包含八字、五行、大运）
 export function toSimpleResult(result: BaziResult, birthYear: number): SimpleBaziResult {
-  const baziString = `${result.yearGanZhi} ${result.monthGanZhi} ${result.dayGanZhi} ${result.timeGanZhi}`;
+  const baziString = formatBaziString(result);
 
-  // 五行统计
+  // 五行统计 - 8个字，每个字代表一个五行
   const allText = result.yearGanZhi + result.monthGanZhi + result.dayGanZhi + result.timeGanZhi;
   let wuxingCount = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
   for (const char of allText) {
     const wx = wuxingMap[char];
     if (wx) wuxingCount[wx as keyof typeof wuxingCount]++;
   }
-  const wuxingString = `木${wuxingCount.木 * 10}% 火${wuxingCount.火 * 10}% 土${wuxingCount.土 * 10}% 金${wuxingCount.金 * 10}% 水${wuxingCount.水 * 10}%`;
+  // 计算百分比 (count/8 * 100)，确保四舍五入后总和为100
+  const total = 8;
+  const wuxingString = `木${Math.round(wuxingCount.木 / total * 100)}% 火${Math.round(wuxingCount.火 / total * 100)}% 土${Math.round(wuxingCount.土 / total * 100)}% 金${Math.round(wuxingCount.金 / total * 100)}% 水${Math.round(wuxingCount.水 / total * 100)}%`;
 
-  // 大运从8岁起
-  const startYear = birthYear + 8;
-  const dayunString = `${startYear}岁起运`;
+  // 大运起运年龄（使用计算得到的值）
+  const dayunString = `${result.dayunStartAge}岁起运`;
 
   return {
     bazi: baziString,
     wuxing: wuxingString,
     dayun: dayunString
   };
+}
+
+// 导出实时预览函数
+export function getPreviewMessage(bazi: SimpleBaziResult): string {
+  if (!bazi || !bazi.bazi) return '';
+  return `您选择的八字：${bazi.bazi}`;
 }

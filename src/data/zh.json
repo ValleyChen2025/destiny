@@ -1,9 +1,9 @@
 {
   "site": {
-    "title": "八字精批",
+    "title": "AI命理报告",
     "subtitle": "洞悉命运 · 把握未来",
-    "price": "$360",
-    "priceNote": "起"
+    "price": "$0.99",
+    "priceNote": ""
   },
   "nav": {
     "home": "首页",
