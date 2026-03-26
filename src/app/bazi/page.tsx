@@ -207,20 +207,28 @@ export default function BaziPage() {
                 {/* 选中大运的流年 */}
                 {selectedDayun !== null && result.dayuns[selectedDayun] && (
                   <div className="mt-4 p-4 bg-green-50 rounded-lg">
-                    <h4 className="font-bold text-green-700 mb-2">
+                    <h4 className="font-bold text-green-700 mb-3">
                       {result.dayuns[selectedDayun].ganZhi} {lang === 'zh' ? '大运流年' : 'Liunian'}
                     </h4>
-                    <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
-                      {result.liunians && result.liunians
-                        .filter((ln: any) => ln.year >= result.dayuns[selectedDayun].startYear && ln.year < result.dayuns[selectedDayun].startYear + 10)
-                        .map((ln: any, i: number) => (
-                          <div key={i} className="text-center p-1 bg-white rounded text-xs">
-                            <div className="text-gray-400">{String(ln.year).slice(2)}</div>
-                            <div className="font-bold text-green-600">{ln.ganZhi}</div>
+                    {(() => {
+                      const filteredLiunians = result.liunians && result.liunians
+                        .filter((ln: any) => ln.year >= result.dayuns[selectedDayun].startYear && ln.year < result.dayuns[selectedDayun].startYear + 10);
+                      if (!filteredLiunians || filteredLiunians.length === 0) return null;
+                      return (
+                        <>
+                          <div className="flex justify-center gap-1 mb-2">
+                            {filteredLiunians.map((ln: any, i: number) => (
+                              <div key={i} className="w-10 text-center text-sm font-bold text-green-700">{ln.ganZhi}</div>
+                            ))}
                           </div>
-                        ))
-                      }
-                    </div>
+                          <div className="flex justify-center gap-1">
+                            {filteredLiunians.map((ln: any, i: number) => (
+                              <div key={i} className="w-10 text-center text-xs text-gray-500">{ln.year}</div>
+                            ))}
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -230,16 +238,33 @@ export default function BaziPage() {
             {result.liunians && result.liunians.length > 0 && (
               <div className="bg-white rounded-lg shadow-lg p-6">
                 <h3 className="text-lg font-bold text-gray-800 mb-4">
-                  {lang === 'zh' ? '流年 (逐年运势)' : 'Liunian (Yearly)'}
+                  {lang === 'zh' ? '流年总表 (逐年运势)' : 'Liunian Overview'}
                 </h3>
-                <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
-                  {result.liunians.slice(0, 20).map((ln: any, idx: number) => (
-                    <div key={idx} className="text-center p-2 bg-gray-50 rounded text-xs">
-                      <div className="text-gray-400">{ln.year}</div>
-                      <div className="font-bold text-blue-600">{ln.ganZhi}</div>
+                {(() => {
+                  const liunians = result.liunians.slice(0, 20);
+                  const rows = [];
+                  for (let i = 0; i < liunians.length; i += 10) {
+                    rows.push(liunians.slice(i, i + 10));
+                  }
+                  return (
+                    <div className="space-y-4">
+                      {rows.map((row, rowIdx) => (
+                        <div key={rowIdx}>
+                          <div className="flex justify-center gap-1 mb-1">
+                            {row.map((ln: any, i: number) => (
+                              <div key={i} className="w-10 text-center text-sm font-bold text-blue-600">{ln.ganZhi}</div>
+                            ))}
+                          </div>
+                          <div className="flex justify-center gap-1">
+                            {row.map((ln: any, i: number) => (
+                              <div key={i} className="w-10 text-center text-xs text-gray-400">{ln.year}</div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
               </div>
             )}
           </div>
