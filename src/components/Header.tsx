@@ -16,27 +16,16 @@ export default function Header() {
             {t.site.title}
           </Link>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link
-              href="/bazi"
+              href="/fortune"
               className={`text-sm px-3 py-1 rounded-full transition-colors ${
-                pathname === '/bazi'
+                pathname === '/fortune'
                   ? 'bg-blue-600 text-white'
                   : 'hover:bg-gray-100 dark:hover:bg-zinc-800'
               }`}
             >
-              {lang === 'zh' ? '八字' : 'Bazi'}
-            </Link>
-
-            <Link
-              href="/wannianrili"
-              className={`text-sm px-3 py-1 rounded-full transition-colors ${
-                pathname === '/wannianrili'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-gray-100 dark:hover:bg-zinc-800'
-              }`}
-            >
-              {lang === 'zh' ? '万年历' : 'Calendar'}
+              {lang === 'zh' ? '命理' : 'Fortune'}
             </Link>
 
             <Link
