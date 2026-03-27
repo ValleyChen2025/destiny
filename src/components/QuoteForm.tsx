@@ -349,13 +349,6 @@ export default function QuoteForm() {
         </div>
       )}
 
-      {/* PayPal 配置警告 */}
-      {!isPayPalConfigured && (
-        <div className="p-2 bg-yellow-50 text-yellow-700 rounded text-xs text-center">
-          {isZh ? '⚠️ 支付系统配置中...' : '⚠️ Payment system configuring...'}
-        </div>
-      )}
-
       {/* 姓名 - 匿名化 */}
       <div>
         <label className="block text-xs font-medium mb-1">

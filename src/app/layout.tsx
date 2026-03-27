@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "八字精批 | Destiny Analysis",
+  title: "蓝海两仪八字 | Destiny Analysis",
   description: "专业八字命理分析，洞悉命运，把握未来",
 };
 

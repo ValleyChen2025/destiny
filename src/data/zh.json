@@ -1,6 +1,6 @@
 {
   "site": {
-    "title": "八字精批",
+    "title": "蓝海两仪八字",
     "subtitle": "洞悉命运 · 把握未来",
     "price": "$0.99",
     "priceNote": ""
@@ -17,14 +17,14 @@
     "about": "关于",
     "privacy": "隐私声明",
     "contact": "联系我们",
-    "copyright": "© 2024 八字精批. All rights reserved."
+    "copyright": "© 2024 蓝海两仪八字. All rights reserved."
   },
   "home": {
-    "heroTitle": "八字精批",
+    "heroTitle": "蓝海两仪八字",
     "heroSubtitle": "洞悉命运 · 把握未来",
     "heroTitleEn": "Destiny Analysis",
     "heroSubtitleEn": "Know Your Fate · Seize Your Future",
-    "ctaPrimary": "立即询价",
+    "ctaPrimary": "在线批算",
     "ctaSecondary": "了解更多",
     "articlesTitle": "文章",
     "videosTitle": "视频"
@@ -45,7 +45,7 @@
     "privacyContent": "所有提交的八字信息仅用于分析，我们将严格保密，绝不泄露给任何第三方。"
   },
   "quote": {
-    "title": "立即询价",
+    "title": "在线批算",
     "name": "姓名",
     "namePlaceholder": "请输入您的姓名",
     "contact": "联系方式",

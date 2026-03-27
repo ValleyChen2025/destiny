@@ -15,6 +15,7 @@ interface CalendarNote {
 
 export default function WannianriliPage() {
   const { lang, t } = useLanguage();
+  const [mounted, setMounted] = useState(false);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [selectedDay, setSelectedDay] = useState<any>(null);
@@ -25,6 +26,34 @@ export default function WannianriliPage() {
   const [noteContent, setNoteContent] = useState('');
   const [noteColor, setNoteColor] = useState('#3B82F6');
   const [noteAlarm, setNoteAlarm] = useState(false);
+
+  // 初始化 - 仅在客户端执行
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window === 'undefined') return;
+
+    const savedPassword = localStorage.getItem('calendar_password');
+    if (!savedPassword) {
+      setIsLocked(false);
+    }
+    const savedNotes = localStorage.getItem('calendar_notes');
+    if (savedNotes) {
+      setNotes(JSON.parse(savedNotes));
+    }
+  }, []);
+
+  // 等待客户端挂载
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white py-12 px-4">
+        <div className="max-w-sm mx-auto">
+          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+            <div className="animate-pulse">Loading...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const weekDays = lang === 'zh'
     ? ['一', '二', '三', '四', '五', '六', '日']
@@ -275,22 +304,7 @@ export default function WannianriliPage() {
   }
 
   // 密码输入界面
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white py-12 px-4">
-        <div className="max-w-sm mx-auto">
-          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-            <div className="animate-pulse">Loading...</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLocked && password === '' && localStorage.getItem('calendar_password')) {
+  if (isLocked && password === '' && typeof window !== 'undefined' && localStorage.getItem('calendar_password')) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-green-50 to-white py-12 px-4">
         <div className="max-w-sm mx-auto">
