@@ -71,8 +71,8 @@
     "note": "Please save your payment screenshot for confirmation"
   },
   "bazi": {
-    "title": "Free Bazi Chart",
-    "subtitle": "Accurate Bazi calculation by solar terms",
+    "title": "Bazi Chart",
+    "subtitle": "",
     "birthDate": "Birth Date",
     "birthTime": "Birth Time",
     "gender": "Gender",
@@ -89,8 +89,8 @@
     "complete": "Contact us for complete analysis"
   },
   "wannianrili": {
-    "title": "Chinese Calendar",
-    "subtitle": "Check daily good/bad luck",
+    "title": "Calendar",
+    "subtitle": "",
     "today": "Today",
     "yi": "Good for",
     "ji": "Avoid",

@@ -12,14 +12,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // hour 是时辰索引（1,3,5,7,9,11,13,15,17,19,21,23）
-    const hourValue = hour || 13;
-    const h = hourValue === 23 ? 0 : hourValue;
+    // hour 是实际小时值 (0-23)
+    const hourValue = hour !== undefined ? hour : 12;
     const minute = 30; // 简化：取时辰中间
 
     // 构造日期字符串
     const birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const birthTimeStr = `${h}:${minute}`;
+    const birthTimeStr = `${hourValue}:${minute}`;
 
     // 使用增强后的引擎计算
     const result = calculateBazi(birthDateStr, birthTimeStr, 120, false, gender || 1);

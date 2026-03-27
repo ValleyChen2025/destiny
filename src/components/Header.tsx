@@ -25,7 +25,7 @@ export default function Header() {
                   : 'hover:bg-gray-100 dark:hover:bg-zinc-800'
               }`}
             >
-              {lang === 'zh' ? '八字' : 'Bazi'}
+              {lang === 'zh' ? '八字排盘' : 'Bazi'}
             </Link>
 
             <Link
@@ -36,7 +36,7 @@ export default function Header() {
                   : 'hover:bg-gray-100 dark:hover:bg-zinc-800'
               }`}
             >
-              {lang === 'zh' ? '万年历' : 'Calendar'}
+              {lang === 'zh' ? '记事日历' : 'Calendar'}
             </Link>
 
             <Link
@@ -47,7 +47,7 @@ export default function Header() {
                   : 'hover:bg-gray-100 dark:hover:bg-zinc-800'
               }`}
             >
-              {lang === 'zh' ? '询价' : 'Quote'}
+              {lang === 'zh' ? '八字批算' : 'Quote'}
             </Link>
 
             <button

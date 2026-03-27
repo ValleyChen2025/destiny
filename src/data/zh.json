@@ -71,8 +71,8 @@
     "note": "付款后请截图保存，我们将与您确认"
   },
   "bazi": {
-    "title": "八字免费排盘",
-    "subtitle": "精确到节气的八字排盘",
+    "title": "八字排盘",
+    "subtitle": "",
     "birthDate": "出生日期",
     "birthTime": "出生时辰",
     "gender": "性别",
@@ -89,8 +89,8 @@
     "complete": "完整命书分析请联系客服"
   },
   "wannianrili": {
-    "title": "万年日历",
-    "subtitle": "查询吉凶宜忌",
+    "title": "日历查询",
+    "subtitle": "",
     "today": "回到今天",
     "yi": "宜",
     "ji": "忌",

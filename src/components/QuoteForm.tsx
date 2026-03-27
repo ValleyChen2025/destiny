@@ -489,19 +489,12 @@ export default function QuoteForm() {
         </p>
       )}
 
-      {/* 价格标签 */}
-      <div className="text-center py-1">
-        <span className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full">
-          ⚡ Flash Sale: $0.99
-        </span>
-      </div>
-
       <button
         type="submit"
         disabled={loading}
         className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-semibold transition-colors"
       >
-        {loading ? (isZh ? '处理中...' : 'Processing...') : (isZh ? '立即支付 $0.99' : 'Pay $0.99 Now')}
+        {loading ? (isZh ? '处理中...' : 'Processing...') : (isZh ? '在线立即批算' : 'Get Analysis Now')}
       </button>
 
       <p className="text-center text-xs text-gray-500">
