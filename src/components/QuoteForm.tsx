@@ -79,9 +79,9 @@ export default function QuoteForm() {
     contact: string;
   } | null>(null);
 
-  // PayPal Client ID - check if configured
-  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
-  // 强制启用支付（避免环境变量问题导致报错）
+  // PayPal Client ID - 硬编码（生产环境用）
+  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'AdYQ6hMNrgF65yv-bexzDK8hQS5A8Gr1t7sHSkgAG3NyEZLA7_PfatjtMsBRrlrqxFHAOHj1fTyEup2Q';
+  // 强制启用支付
   const isPayPalConfigured = true;
 
   useEffect(() => {
